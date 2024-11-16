@@ -1,6 +1,6 @@
 
 #include "m_pd.h"
-#include "motion.hpp"
+#include "motion.h"
 
 // TODO: add list outlet; messages for start/stop/reset calibration; process
 // IMU data; get gravity, local, world, and player vectors
