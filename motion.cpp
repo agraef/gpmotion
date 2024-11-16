@@ -31,9 +31,9 @@ extern "C" void gamepad_motion_process(GamepadMotion *gp,
   float gyroX, float gyroY, float gyroZ,
   float accelX, float accelY, float accelZ, float deltaTime)
 {
-  // we need to normalize acceleration values (9.81 m/s^2 = 1g) for Jibb
-  // Smart's algorithm to work
-  gp->ProcessMotion(gyroX, gyroY, gyroZ,
+  // we need to normalize acceleration values (9.81 m/s^2 = 1g) and convert
+  // gyro values to degrees/s for Jibb's algorithm
+  gp->ProcessMotion(gyroX/M_PI*180.0, gyroY/M_PI*180.0, gyroZ/M_PI*180.0,
     accelX/9.81, accelY/9.81, accelZ/9.81, deltaTime);
 }
 
