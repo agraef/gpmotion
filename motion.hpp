@@ -1,4 +1,5 @@
 
+#if defined __cplusplus
 class GamepadMotion;
 
 // initialize and finalize gamepad motion data
@@ -34,3 +35,23 @@ extern "C" void gamepad_motion_gravity(GamepadMotion *gp, float *x, float *y, fl
 extern "C" void gamepad_motion_local(GamepadMotion *gp, float *x, float *y, float *z);
 extern "C" void gamepad_motion_world(GamepadMotion *gp, float *x, float *y);
 extern "C" void gamepad_motion_player(GamepadMotion *gp, float *x, float *y);
+
+#else
+
+// C doesn't know about C++ classes, so we fake it
+#define GamepadMotion void
+
+extern GamepadMotion *gamepad_motion_init();
+extern void gamepad_motion_fini(GamepadMotion *gp);
+extern void gamepad_motion_start_calibration(GamepadMotion *gp);
+extern void gamepad_motion_stop_calibration(GamepadMotion *gp);
+extern void gamepad_motion_reset_calibration(GamepadMotion *gp);
+extern void gamepad_motion_process(GamepadMotion *gp,
+  float gyroX, float gyroY, float gyroZ,
+  float accelX, float accelY, float accelZ, float deltaTime);
+extern void gamepad_motion_gravity(GamepadMotion *gp, float *x, float *y, float *z);
+extern void gamepad_motion_local(GamepadMotion *gp, float *x, float *y, float *z);
+extern void gamepad_motion_world(GamepadMotion *gp, float *x, float *y);
+extern void gamepad_motion_player(GamepadMotion *gp, float *x, float *y);
+
+#endif
