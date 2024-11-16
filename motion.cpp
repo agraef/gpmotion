@@ -1,6 +1,6 @@
 
 #include "GamepadMotion.hpp"
-#include "GPMotion.hpp"
+#include "motion.hpp"
 
 extern "C" GamepadMotion *gamepad_motion_init()
 {

@@ -15,7 +15,7 @@ lib.name = gpmotion
 
 gpmotion_version := $(shell git describe --tags 2>/dev/null)
 
-gpmotion.class.sources := gpmotion.c GPMotion.cpp
+gpmotion.class.sources := gpmotion.c motion.cpp
 gpmotion.class.ldlibs := -lm
 
 datafiles = COPYING $(wildcard gpmotion*-help.pd)
