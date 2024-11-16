@@ -401,7 +401,7 @@ namespace GamepadMotionHelpers
 		return x * x + y * y + z * z;
 	}
 
-	inline void Vec::Normalize()
+	void Vec::Normalize()
 	{
 		const float length = Length();
 		if (length == 0.0)
@@ -552,7 +552,7 @@ namespace GamepadMotionHelpers
 	/// <summary>
 	/// The gyro inputs should be calibrated degrees per second but have no other processing. Acceleration is in G units (1 = approx. 9.8m/s^2)
 	/// </summary>
-	inline void Motion::Update(float inGyroX, float inGyroY, float inGyroZ, float inAccelX, float inAccelY, float inAccelZ, float gravityLength, float deltaTime)
+	void Motion::Update(float inGyroX, float inGyroY, float inGyroZ, float inAccelX, float inAccelY, float inAccelZ, float gravityLength, float deltaTime)
 	{
 		if (!Settings)
 		{
@@ -810,11 +810,6 @@ namespace GamepadMotionHelpers
 		{
 			if (MinMaxWindow.NumSamples >= minStillnessSamples && MinMaxWindow.TimeSampled >= minStillnessCorrectionTime)
 			{
-				/*if (TimeSteadyStillness == 0.f)
-				{
-					printf("Still!\n");
-				}/**/
-
 				TimeSteadyStillness = std::min(TimeSteadyStillness + deltaTime, stillnessCalibrationEaseInTime);
 				const float calibrationEaseIn = stillnessCalibrationEaseInTime <= 0.f ? 1.f : TimeSteadyStillness / stillnessCalibrationEaseInTime;
 
@@ -973,20 +968,11 @@ namespace GamepadMotionHelpers
 		// apply corrections
 		if (gyroAccelerationMag > sensorFusionAngularAccelerationThreshold || CalibrationData == nullptr)
 		{
-			/*if (TimeSteadySensorFusion > 0.f)
-			{
-				printf("Shaken!\n");
-			}/**/
 			TimeSteadySensorFusion = 0.f;
 			//printf("No calibration due to acceleration of %.4f\n", gyroAccelerationMag);
 		}
 		else
 		{
-			/*if (TimeSteadySensorFusion == 0.f)
-			{
-				printf("Steady!\n");
-			}/**/
-
 			TimeSteadySensorFusion = std::min(TimeSteadySensorFusion + deltaTime, sensorFusionCalibrationEaseInTime);
 			const float calibrationEaseIn = sensorFusionCalibrationEaseInTime <= 0.f ? 1.f : TimeSteadySensorFusion / sensorFusionCalibrationEaseInTime;
 			const Vec oldGyroBias = Vec(CalibrationData->X, CalibrationData->Y, CalibrationData->Z) / std::max((float)CalibrationData->NumSamples, 1.f);
