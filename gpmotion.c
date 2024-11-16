@@ -2,36 +2,149 @@
 #include "m_pd.h"
 #include "motion.h"
 
-// TODO: add list outlet; messages for start/stop/reset calibration; process
-// IMU data; get gravity, local, world, and player vectors
-
 static t_class *gpmotion_class;
+
+static t_symbol *s_gravity, *s_local, *s_world, *s_player;
 
 typedef struct _gpmotion {
     t_object  x_obj;
     GamepadMotion *gp;
+    float ax, ay, az, gx, gy, gz;
+    double t;
+    int state;
+    t_outlet *out;
 } t_gpmotion;
 
-void gpmotion_bang(t_gpmotion *x)
+// bang yields the normalized gravity vector (x, y, z)
+
+static void gpmotion_bang(t_gpmotion *x)
 {
-    post("gpmotion %p", x->gp);
+    if (x->state >= 0 && x->t != 0.0f) {
+        float xf, yf, zf;
+        gamepad_motion_gravity(x->gp, &xf, &yf, &zf);
+        t_atom ap[3];
+        SETFLOAT(ap+0, xf);
+        SETFLOAT(ap+1, yf);
+        SETFLOAT(ap+2, zf);
+        outlet_anything(x->out, s_gravity, 3, ap);
+    }
 }
 
-void *gpmotion_new(void)
+// local yields rotation in deg/s (x, y, z)
+
+static void gpmotion_local(t_gpmotion *x)
+{
+    if (x->state >= 0 && x->t != 0.0f) {
+        float xf, yf, zf;
+        gamepad_motion_local(x->gp, &xf, &yf, &zf);
+        t_atom ap[3];
+        SETFLOAT(ap+0, xf);
+        SETFLOAT(ap+1, yf);
+        SETFLOAT(ap+2, zf);
+        outlet_anything(x->out, s_local, 3, ap);
+    }
+}
+
+// world and player yield rotation in deg/s (x, y) in world and player space
+
+static void gpmotion_world(t_gpmotion *x)
+{
+    if (x->state >= 0 && x->t != 0.0f) {
+        float xf, yf;
+        gamepad_motion_world(x->gp, &xf, &yf);
+        t_atom ap[2];
+        SETFLOAT(ap+0, xf);
+        SETFLOAT(ap+1, yf);
+        outlet_anything(x->out, s_world, 2, ap);
+    }
+}
+
+static void gpmotion_player(t_gpmotion *x)
+{
+    if (x->state >= 0 && x->t != 0.0f) {
+        float xf, yf;
+        gamepad_motion_player(x->gp, &xf, &yf);
+        t_atom ap[2];
+        SETFLOAT(ap+0, xf);
+        SETFLOAT(ap+1, yf);
+        outlet_anything(x->out, s_player, 2, ap);
+    }
+}
+
+// calibration
+
+static void gpmotion_start(t_gpmotion *x)
+{
+    gamepad_motion_start_calibration(x->gp);
+}
+
+static void gpmotion_stop(t_gpmotion *x)
+{
+    gamepad_motion_stop_calibration(x->gp);
+}
+
+static void gpmotion_reset(t_gpmotion *x)
+{
+    gamepad_motion_reset_calibration(x->gp);
+}
+
+// update the IMU data (every second time, assuming alternating accel and gyro
+// values, as output by joyosc)
+
+static void gpmotion_update(t_gpmotion *x)
+{
+    double t = x->t;
+    x->t = clock_getlogicaltime();
+    if (t != 0.0f && x->t > t) {
+        gamepad_motion_process(x->gp,
+                               x->gx, x->gy, x->gz,
+                               x->ax, x->ay, x->az, clock_gettimesince(t));
+    }
+    x->state = 0;
+}
+
+static void gpmotion_accel(t_gpmotion *x, t_floatarg xf, t_floatarg yf, t_floatarg zf)
+{
+    x->ax = xf; x->ay = yf; x->az = zf;
+    if (x->state <= 0)
+        x->state++;
+    else
+        gpmotion_update(x);
+}
+
+static void gpmotion_gyro(t_gpmotion *x, t_floatarg xf, t_floatarg yf, t_floatarg zf)
+{
+    x->gx = xf; x->gy = yf; x->gz = zf;
+    if (x->state <= 0)
+        x->state++;
+    else
+        gpmotion_update(x);
+}
+
+static void *gpmotion_new(void)
 {
     t_gpmotion *x = (t_gpmotion *)pd_new(gpmotion_class);
     x->gp = gamepad_motion_init();
-
+    x->ax = 0.0f; x->ay = 0.0f; x->az = 0.0f;
+    x->gx = 0.0f; x->gy = 0.0f; x->gz = 0.0f;
+    x->t = 0.0f;
+    x->state = -1;
+    x->out = outlet_new(&x->x_obj, 0);
     return (void *)x;
 }
 
-void gpmotion_free(t_gpmotion *x)
+static void gpmotion_free(t_gpmotion *x)
 {
     gamepad_motion_fini(x->gp);
 }
 
 void gpmotion_setup(void)
 {
+    s_gravity = gensym("gravity");
+    s_local = gensym("local");
+    s_world = gensym("world");
+    s_player = gensym("player");
+
     gpmotion_class = class_new(gensym("gpmotion"),
                                (t_newmethod)gpmotion_new,
                                (t_method)gpmotion_free,
@@ -39,4 +152,18 @@ void gpmotion_setup(void)
                                CLASS_DEFAULT, 0);
 
     class_addbang(gpmotion_class, gpmotion_bang);
+    class_addmethod(gpmotion_class,
+                    (t_method)gpmotion_local, s_local, 0);
+    class_addmethod(gpmotion_class,
+                    (t_method)gpmotion_world, s_world, 0);
+    class_addmethod(gpmotion_class,
+                    (t_method)gpmotion_player, s_player, 0);
+    class_addmethod(gpmotion_class,
+                    (t_method)gpmotion_start, gensym("start"), 0);
+    class_addmethod(gpmotion_class,
+                    (t_method)gpmotion_stop, gensym("stop"), 0);
+    class_addmethod(gpmotion_class,
+                    (t_method)gpmotion_reset, gensym("reset"), 0);
+    class_addmethod(gpmotion_class, (t_method)gpmotion_accel, gensym("accel"), A_FLOAT, A_FLOAT, A_FLOAT, 0);
+    class_addmethod(gpmotion_class, (t_method)gpmotion_gyro, gensym("gyro"), A_FLOAT, A_FLOAT, A_FLOAT, 0);
 }
