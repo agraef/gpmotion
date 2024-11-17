@@ -34,7 +34,15 @@ extern "C" void gamepad_motion_process(GamepadMotion *gp,
 extern "C" void gamepad_motion_gravity(GamepadMotion *gp, float *x, float *y, float *z);
 
 // return calibrated rotation (x,y,z) or (x,y) degrees/s data in local, world,
-// and player space (see Jibb Smart's gyro wiki for details)
+// and player space; more details can be found at Jibb Smart's wiki, see:
+// http://gyrowiki.jibbsmart.com/blog
+
+// NOTE: We use a patched version of Jibb's GamepadMotion.hpp here. The
+// original version seems to have left and right swapped in some cases
+// (probably a simple sign error somewhere). At least that's the case with the
+// gyro data provided by the SDL library (such as in joyosc). Our fix is to
+// just flip the sign in the right places so that the gyro API functions
+// return proper yaw/roll data (pointing left if turning or leaning left).
 
 extern "C" void gamepad_motion_local(GamepadMotion *gp, float *x, float *y, float *z);
 extern "C" void gamepad_motion_world(GamepadMotion *gp, float *x, float *y);

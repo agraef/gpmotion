@@ -1121,8 +1121,8 @@ inline void GamepadMotion::ProcessMotion(float gyroX, float gyroY, float gyroZ,
 inline void GamepadMotion::GetCalibratedGyro(float& x, float& y, float& z)
 {
 	x = Gyro.x;
-	y = Gyro.y;
-	z = Gyro.z;
+	y = -Gyro.y;
+	z = -Gyro.z;
 }
 
 inline void GamepadMotion::GetGravity(float& x, float& y, float& z)
@@ -1149,7 +1149,7 @@ inline void GamepadMotion::GetOrientation(float& w, float& x, float& y, float& z
 
 inline void GamepadMotion::GetPlayerSpaceGyro(float& x, float& y, const float yawRelaxFactor)
 {
-	CalculatePlayerSpaceGyro(x, y, Gyro.x, Gyro.y, Gyro.z, Motion.Grav.x, Motion.Grav.y, Motion.Grav.z, yawRelaxFactor);
+	CalculatePlayerSpaceGyro(x, y, Gyro.x, -Gyro.y, Gyro.z, Motion.Grav.x, Motion.Grav.y, Motion.Grav.z, yawRelaxFactor);
 }
 
 inline void GamepadMotion::CalculatePlayerSpaceGyro(float& x, float& y, const float gyroX, const float gyroY, const float gyroZ, const float gravX, const float gravY, const float gravZ, const float yawRelaxFactor)
@@ -1163,7 +1163,7 @@ inline void GamepadMotion::CalculatePlayerSpaceGyro(float& x, float& y, const fl
 
 inline void GamepadMotion::GetWorldSpaceGyro(float& x, float& y, const float sideReductionThreshold)
 {
-	CalculateWorldSpaceGyro(x, y, Gyro.x, Gyro.y, Gyro.z, Motion.Grav.x, Motion.Grav.y, Motion.Grav.z, sideReductionThreshold);
+	CalculateWorldSpaceGyro(x, y, Gyro.x, -Gyro.y, Gyro.z, Motion.Grav.x, Motion.Grav.y, Motion.Grav.z, sideReductionThreshold);
 }
 
 inline void GamepadMotion::CalculateWorldSpaceGyro(float& x, float& y, const float gyroX, const float gyroY, const float gyroZ, const float gravX, const float gravY, const float gravZ, const float sideReductionThreshold)
