@@ -34,7 +34,7 @@ extern "C" void gamepad_motion_gravity(GamepadMotion *gp, float *x, float *y, fl
 
 extern "C" void gamepad_motion_local(GamepadMotion *gp, float *x, float *y, float *z);
 extern "C" void gamepad_motion_world(GamepadMotion *gp, float *x, float *y);
-extern "C" void gamepad_motion_player(GamepadMotion *gp, float *x, float *y);
+extern "C" void gamepad_motion_player(GamepadMotion *gp, float *x, float *y, float f);
 
 #else
 
@@ -52,6 +52,6 @@ extern void gamepad_motion_process(GamepadMotion *gp,
 extern void gamepad_motion_gravity(GamepadMotion *gp, float *x, float *y, float *z);
 extern void gamepad_motion_local(GamepadMotion *gp, float *x, float *y, float *z);
 extern void gamepad_motion_world(GamepadMotion *gp, float *x, float *y);
-extern void gamepad_motion_player(GamepadMotion *gp, float *x, float *y);
+extern void gamepad_motion_player(GamepadMotion *gp, float *x, float *y, float f);
 
 #endif

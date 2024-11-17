@@ -9,6 +9,7 @@ static t_symbol *s_gravity, *s_local, *s_world, *s_player;
 typedef struct _gpmotion {
     t_object  x_obj;
     GamepadMotion *gp;
+    float yaw_rf;
     float ax, ay, az, gx, gy, gz;
     float lx, ly, lz;
     float wx, wy;
@@ -18,9 +19,26 @@ typedef struct _gpmotion {
     t_outlet *out;
 } t_gpmotion;
 
+// gyro mode: 0 = accumulated rotation [deg], 1 = momentary angular velocity
+// [deg/sec]
+
 static void gpmotion_mode(t_gpmotion *x, t_floatarg f)
 {
     x->mode = f != 0;
+}
+
+// yaw relax factor for player space (sensible range is about 1.15 .. 2 which
+// corresponds to ~30° to ~60° of freedom for local space aiming); see
+// http://gyrowiki.jibbsmart.com/blog:player-space-gyro-and-alternatives-explained#toc7
+
+static void gpmotion_yawrf(t_gpmotion *x, t_floatarg f)
+{
+    // JoyShockMapper default
+    if (f == 0.0f) f = 2.0f;
+    // clamp to a sensible range
+    if (f < 1.0f) f = 1.0f;
+    if (f > 4.0f) f = 4.0f;
+    x->yaw_rf = f;
 }
 
 // bang yields the normalized gravity vector (x, y, z)
@@ -77,7 +95,7 @@ static void gpmotion_player(t_gpmotion *x)
     if (x->state >= 0 && x->t != 0.0f) {
         float xf, yf;
         if (x->mode)
-            gamepad_motion_player(x->gp, &xf, &yf);
+            gamepad_motion_player(x->gp, &xf, &yf, x->yaw_rf);
         else
             xf = x->px, yf = x->py;
         t_atom ap[2];
@@ -131,7 +149,7 @@ static void gpmotion_update(t_gpmotion *x)
         x->lx += xf*dt; x->ly += yf*dt; x->lz += zf*dt;
         gamepad_motion_world(x->gp, &xf, &yf);
         x->wx += xf*dt; x->wy += yf*dt;
-        gamepad_motion_player(x->gp, &xf, &yf);
+        gamepad_motion_player(x->gp, &xf, &yf, x->yaw_rf);
         x->px += xf*dt; x->py += yf*dt;
     }
     x->state = 0;
@@ -159,6 +177,9 @@ static void *gpmotion_new(void)
 {
     t_gpmotion *x = (t_gpmotion *)pd_new(gpmotion_class);
     x->gp = gamepad_motion_init();
+    // yaw relax factor for player space (2.0 = 60° is the default being used
+    // in JoyShockMapper, internal default is 1.41 = 45°)
+    x->yaw_rf = 2.0f;
     x->ax = 0.0f; x->ay = 0.0f; x->az = 0.0f;
     x->gx = 0.0f; x->gy = 0.0f; x->gz = 0.0f;
     x->lx = 0.0f; x->ly = 0.0f; x->lz = 0.0f;
@@ -191,6 +212,8 @@ void gpmotion_setup(void)
 
     class_addmethod(gpmotion_class,
                     (t_method)gpmotion_mode, gensym("mode"), A_DEFFLOAT, 0);
+    class_addmethod(gpmotion_class,
+                    (t_method)gpmotion_yawrf, gensym("yawrf"), A_DEFFLOAT, 0);
     class_addbang(gpmotion_class, gpmotion_bang);
     class_addmethod(gpmotion_class,
                     (t_method)gpmotion_local, s_local, 0);

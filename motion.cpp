@@ -52,7 +52,7 @@ extern "C" void gamepad_motion_world(GamepadMotion *gp, float *x, float *y)
   gp->GetWorldSpaceGyro(*x, *y);
 }
 
-extern "C" void gamepad_motion_player(GamepadMotion *gp, float *x, float *y)
+extern "C" void gamepad_motion_player(GamepadMotion *gp, float *x, float *y, float f)
 {
-  gp->GetPlayerSpaceGyro(*x, *y);
+  gp->GetPlayerSpaceGyro(*x, *y, f);
 }

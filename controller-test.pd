@@ -1,4 +1,4 @@
-#N canvas 568 263 743 392 12;
+#N canvas 510 263 743 392 12;
 #X obj 143 20 tgl 15 0 empty empty print 17 7 0 10 #fcfcfc #000000
 #000000 0 1;
 #N canvas 757 376 418 358 oscreceive 0;
@@ -33,13 +33,13 @@
 #X coords 0 358 1 357 140 40 0;
 #X restore 20 50 pd oscreceive 8880;
 #X obj 20 20 tgl 15 0 empty empty poll 17 7 0 10 #fcfcfc #000000 #000000
-1 1;
+0 1;
 #X floatatom 108 17 0 0 9 0 gc - -;
 #X listbox 20 167 18 0 0 0 - - -, f 18;
 #X listbox 49 197 18 0 0 0 - - -, f 18;
 #X listbox 104 260 40 0 0 0 - data -, f 40;
 #X obj 138 110 tgl 15 0 empty empty empty 17 7 0 10 #fcfcfc #000000
-#000000 1 1;
+#000000 0 1;
 #X floatatom 200 170 0 0 0 3 index - -;
 #X floatatom 257 170 0 0 0 3 finger - -;
 #X listbox 310 171 20 0 0 3 x-y-pressure - -, f 20;
@@ -79,7 +79,7 @@
 #X restore 220 140 pd touchpad;
 #X obj 294 110 tgl 15 0 empty empty empty 17 7 0 10 #fcfcfc #000000
 #000000 0 1;
-#N canvas 471 255 450 417 motion 0;
+#N canvas 472 255 450 417 motion 0;
 #X obj 20 70 spigot;
 #X obj 20 20 inlet;
 #X obj 80 20 inlet;
@@ -338,6 +338,8 @@
 #X msg 240 190 mode \$1;
 #X obj 115 50 r space;
 #X obj 240 160 r mode;
+#X obj 310 160 r yawrf;
+#X msg 310 190 yawrf \$1;
 #X connect 0 0 4 0;
 #X connect 1 0 0 0;
 #X connect 2 0 0 1;
@@ -362,6 +364,8 @@
 #X connect 16 0 3 0;
 #X connect 17 0 8 0;
 #X connect 18 0 16 0;
+#X connect 19 0 20 0;
+#X connect 20 0 3 0;
 #X restore 78 137 pd motion;
 #X msg 410 20 gravity;
 #X msg 410 40 local;
@@ -395,34 +399,34 @@
 ;
 #X text 20 300 processed data calculated by the gpmotion object:;
 #X obj 500 50 hsl 64 15 -1 1 0 0 empty gravx empty -2 -8 0 10 #fcfcfc
-#000000 #000000 2573 1;
+#000000 #000000 0 1;
 #X obj 500 70 hsl 64 15 -1 1 0 0 empty gravy empty -2 -8 0 10 #fcfcfc
-#000000 #000000 54 1;
+#000000 #000000 0 1;
 #X obj 500 90 hsl 64 15 -1 1 0 0 empty gravz empty -2 -8 0 10 #fcfcfc
-#000000 #000000 3087 1;
+#000000 #000000 0 1;
 #X text 500 25 gravity;
 #X obj 500 150 hsl 64 15 -1 1 0 0 empty locx empty -2 -8 0 10 #fcfcfc
-#000000 #000000 3746 1;
+#000000 #000000 0 1;
 #X obj 500 170 hsl 64 15 -1 1 0 0 empty locy empty -2 -8 0 10 #fcfcfc
-#000000 #000000 4392 1;
+#000000 #000000 0 1;
 #X obj 500 190 hsl 64 15 -1 1 0 0 empty locz empty -2 -8 0 10 #fcfcfc
-#000000 #000000 2958 1;
+#000000 #000000 0 1;
 #X text 500 125 local space;
 #X text 590 47 x - right;
 #X text 590 147 pitch - up;
 #X text 590 167 yaw - left;
 #X text 590 187 roll - left;
 #X obj 500 250 hsl 64 15 -1 1 0 0 empty wrldx empty -2 -8 0 10 #fcfcfc
-#000000 #000000 4727 1;
+#000000 #000000 0 1;
 #X obj 500 270 hsl 64 15 -1 1 0 0 empty wrldy empty -2 -8 0 10 #fcfcfc
-#000000 #000000 2652 1;
+#000000 #000000 0 1;
 #X text 590 247 pitch - up;
 #X text 590 267 yaw - left;
 #X text 500 225 world space;
 #X obj 500 330 hsl 64 15 -1 1 0 0 empty plyrx empty -2 -8 0 10 #fcfcfc
-#000000 #000000 3823 1;
+#000000 #000000 0 1;
 #X obj 500 350 hsl 64 15 -1 1 0 0 empty plyry empty -2 -8 0 10 #fcfcfc
-#000000 #000000 3417 1;
+#000000 #000000 0 1;
 #X text 590 327 pitch - up;
 #X text 590 347 yaw - left;
 #X text 500 305 player space;
@@ -434,7 +438,7 @@
 #X obj 400 300 bng 15 250 50 0 reset empty reset 17 7 0 10 #fcfcfc
 #000000 #000000;
 #X text 380 320 reset rotation;
-#N canvas 1271 475 500 277 config 0;
+#N canvas 1127 332 538 379 config 0;
 #X text 20 20 gyro calibration;
 #X obj 31 43 tgl 15 0 calibrate empty enable 17 7 0 10 #fcfcfc #000000
 #000000 0 1;
@@ -443,33 +447,38 @@
 #X msg 60 130 10;
 #X msg 20 130 25;
 #X floatatom 20 188 5 0 0 0 - - period, f 5;
-#X obj 190 134 hradio 15 0 1 6 empty empty empty 0 -8 0 10 #fcfcfc
+#X obj 230 134 hradio 15 0 1 6 empty empty empty 0 -8 0 10 #fcfcfc
 #000000 #000000 2;
-#X floatatom 190 188 5 0 0 0 - - angle, f 5;
-#X text 190 110 sensitivity;
-#X obj 190 159 expr 360/(pow(2 \, $f1));
-#X obj 200 43 tgl 15 1 mode empty mode 17 7 0 10 #fcfcfc #000000 #000000
+#X floatatom 230 188 5 0 0 0 - - angle, f 5;
+#X text 230 110 sensitivity;
+#X obj 230 159 expr 360/(pow(2 \, $f1));
+#X obj 240 43 tgl 15 1 mode empty mode 17 7 0 10 #fcfcfc #000000 #000000
 0 1;
-#X text 190 60 enable this to show angular velocity [deg/s] instead
+#X text 230 60 enable this to show angular velocity [deg/s] instead
 of rotation angle [deg], f 39;
 #X text 20 110 update rate (Hz);
-#X text 190 214 scale the actual rotation by a sensitivity factor \,
+#X text 230 214 scale the actual rotation by a sensitivity factor \,
 the value above is the max angle that will be shown in the display
 , f 42;
 #X text 20 60 keep the gamepad still while calibrating, f 22;
-#X text 20 214 determines the display update cycle \, value above is
-the time [ms], f 22;
 #X obj 20 159 expr 1000/$f1;
 #X msg 140 130 1;
 #X msg 100 130 5;
-#X text 190 20 gyro mode;
-#X connect 3 0 16 0;
-#X connect 4 0 16 0;
+#X text 230 20 gyro mode;
+#X text 20 214 determines the display update rate \, calculated value
+is the period in msec, f 27;
+#X text 230 280 yaw relax factor;
+#X obj 230 305 hsl 128 15 1.15 2 0 1 yawrf empty empty -2 -8 0 10 #fcfcfc
+#000000 #000000 12700 1;
+#X text 230 330 buffer zone for combined yaw + roll (player space)
+, f 37;
+#X connect 3 0 15 0;
+#X connect 4 0 15 0;
 #X connect 6 0 9 0;
 #X connect 9 0 7 0;
-#X connect 16 0 5 0;
-#X connect 17 0 16 0;
-#X connect 18 0 16 0;
+#X connect 15 0 5 0;
+#X connect 16 0 15 0;
+#X connect 17 0 15 0;
 #X restore 250 30 pd config;
 #X obj 410 109 s space;
 #X obj 410 260 tgl 15 0 freeze empty freeze 17 7 0 10 #fcfcfc #000000
