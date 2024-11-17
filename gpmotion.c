@@ -123,12 +123,18 @@ static void gpmotion_start(t_gpmotion *x)
 
 static void gpmotion_stop(t_gpmotion *x)
 {
+    float xf, yf, zf;
     gamepad_motion_stop_calibration(x->gp);
+    gamepad_motion_calibration(x->gp, &xf, &yf, &zf);
+    post("calibration: %f %f %f", xf, yf, zf);
 }
 
 static void gpmotion_clear(t_gpmotion *x)
 {
+    float xf, yf, zf;
     gamepad_motion_reset_calibration(x->gp);
+    gamepad_motion_calibration(x->gp, &xf, &yf, &zf);
+    post("calibration: %f %f %f", xf, yf, zf);
 }
 
 // update the IMU data (every second time, assuming alternating accel and gyro

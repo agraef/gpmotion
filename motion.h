@@ -13,6 +13,10 @@ extern "C" void gamepad_motion_start_calibration(GamepadMotion *gp);
 extern "C" void gamepad_motion_stop_calibration(GamepadMotion *gp);
 extern "C" void gamepad_motion_reset_calibration(GamepadMotion *gp);
 
+// get calibration data
+
+extern "C" void gamepad_motion_calibration(GamepadMotion *gp, float *x, float *y, float *z);
+
 // process raw motion (gyro and acceleration) data
 
 // NOTE: The input should be IMU data in radians/s and m/s^2 as provided by,
@@ -46,6 +50,7 @@ extern void gamepad_motion_fini(GamepadMotion *gp);
 extern void gamepad_motion_start_calibration(GamepadMotion *gp);
 extern void gamepad_motion_stop_calibration(GamepadMotion *gp);
 extern void gamepad_motion_reset_calibration(GamepadMotion *gp);
+extern void gamepad_motion_calibration(GamepadMotion *gp, float *x, float *y, float *z);
 extern void gamepad_motion_process(GamepadMotion *gp,
   float gyroX, float gyroY, float gyroZ,
   float accelX, float accelY, float accelZ, float deltaTime);

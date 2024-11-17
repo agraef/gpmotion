@@ -27,6 +27,11 @@ extern "C" void gamepad_motion_reset_calibration(GamepadMotion *gp)
   gp->ResetContinuousCalibration();
 }
 
+extern "C" void gamepad_motion_calibration(GamepadMotion *gp, float *x, float *y, float *z)
+{
+  gp->GetCalibrationOffset(*x, *y, *z);
+}
+
 extern "C" void gamepad_motion_process(GamepadMotion *gp,
   float gyroX, float gyroY, float gyroZ,
   float accelX, float accelY, float accelZ, float deltaTime)
