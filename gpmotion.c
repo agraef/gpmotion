@@ -9,12 +9,16 @@ static t_symbol *s_gravity, *s_local, *s_world, *s_player;
 typedef struct _gpmotion {
     t_object  x_obj;
     GamepadMotion *gp;
+    // yaw relax factor for player space
     float yaw_rf;
+    // raw sensor data
     float ax, ay, az, gx, gy, gz;
-    float lx, ly, lz;
-    float wx, wy;
-    float px, py;
+    // processed gyro data (local, world, player space)
+    float lx, ly, lz, wx, wy, px, py; // accumulated [deg]
+    float slx, sly, slz, swx, swy, spx, spy; // sampled [deg/s]
+    // Pd time of last sensor update
     double t;
+    // state of sensor update, gyro mode
     int state, mode;
     t_outlet *out;
 } t_gpmotion;
@@ -70,7 +74,7 @@ static void gpmotion_local(t_gpmotion *x)
     if (x->state >= 0 && x->t != 0.0f) {
         float xf, yf, zf;
         if (x->mode)
-            gamepad_motion_local(x->gp, &xf, &yf, &zf);
+            xf = x->slx, yf = x->sly, zf = x->slz;
         else
             xf = x->lx, yf = x->ly, zf = x->lz;
         t_atom ap[3];
@@ -86,7 +90,7 @@ static void gpmotion_world(t_gpmotion *x)
     if (x->state >= 0 && x->t != 0.0f) {
         float xf, yf;
         if (x->mode)
-            gamepad_motion_world(x->gp, &xf, &yf);
+            xf = x->swx, yf = x->swy;
         else
             xf = x->wx, yf = x->wy;
         t_atom ap[2];
@@ -101,7 +105,7 @@ static void gpmotion_player(t_gpmotion *x)
     if (x->state >= 0 && x->t != 0.0f) {
         float xf, yf;
         if (x->mode)
-            gamepad_motion_player(x->gp, &xf, &yf, x->yaw_rf);
+            xf = x->spx, yf = x->spy;
         else
             xf = x->px, yf = x->py;
         t_atom ap[2];
@@ -116,8 +120,7 @@ static void gpmotion_player(t_gpmotion *x)
 static void gpmotion_reset(t_gpmotion *x)
 {
     x->lx = 0.0f; x->ly = 0.0f; x->lz = 0.0f;
-    x->wx = 0.0f; x->wy = 0.0f;
-    x->px = 0.0f; x->py = 0.0f;
+    x->wx = 0.0f; x->wy = 0.0f; x->px = 0.0f; x->py = 0.0f;
 }
 
 // calibration
@@ -156,13 +159,16 @@ static void gpmotion_update(t_gpmotion *x)
         gamepad_motion_process(x->gp,
                                x->gx, x->gy, x->gz,
                                x->ax, x->ay, x->az, dt);
-        // accumulate
+        // sample and accumulate gyro data
         gamepad_motion_local(x->gp, &xf, &yf, &zf);
         x->lx += xf*dt; x->ly += yf*dt; x->lz += zf*dt;
+        x->slx = xf; x->sly = yf; x->slz = zf;
         gamepad_motion_world(x->gp, &xf, &yf);
         x->wx += xf*dt; x->wy += yf*dt;
+        x->swx = xf; x->swy = yf;
         gamepad_motion_player(x->gp, &xf, &yf, x->yaw_rf);
         x->px += xf*dt; x->py += yf*dt;
+        x->spx = xf; x->spy = yf;
     }
     x->state = 0;
 }
@@ -195,8 +201,9 @@ static void *gpmotion_new(void)
     x->ax = 0.0f; x->ay = 0.0f; x->az = 0.0f;
     x->gx = 0.0f; x->gy = 0.0f; x->gz = 0.0f;
     x->lx = 0.0f; x->ly = 0.0f; x->lz = 0.0f;
-    x->wx = 0.0f; x->wy = 0.0f;
-    x->px = 0.0f; x->py = 0.0f;
+    x->wx = 0.0f; x->wy = 0.0f; x->px = 0.0f; x->py = 0.0f;
+    x->slx = 0.0f; x->sly = 0.0f; x->slz = 0.0f;
+    x->swx = 0.0f; x->swy = 0.0f; x->spx = 0.0f; x->spy = 0.0f;
     x->t = 0.0f;
     x->state = -1;
     x->mode = 0;
