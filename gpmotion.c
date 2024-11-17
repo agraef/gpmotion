@@ -59,6 +59,14 @@ static void gpmotion_bang(t_gpmotion *x)
 // retrieve current angular velocity in deg/s (mode == 1), or rotation angle
 // (mode == 0) in deg, (x, y, z) in local, or (x, y) in world/player space
 
+// NOTE: x is pitch, y is yaw, and z (in local space) is roll here. Player
+// space combines local pitch with a combination of local yaw and roll
+// relative to the gravity vector. Also, yaw and roll seem to be pointing into
+// the opposite direction (left instead of right, and vice versa), so we
+// invert those values in the methods below. I'm not sure why that is, maybe
+// it's because the z axis on PS gamepads points to the back of the controller
+// instead of the front.
+
 static void gpmotion_local(t_gpmotion *x)
 {
     if (x->state >= 0 && x->t != 0.0f) {
@@ -69,8 +77,8 @@ static void gpmotion_local(t_gpmotion *x)
             xf = x->lx, yf = x->ly, zf = x->lz;
         t_atom ap[3];
         SETFLOAT(ap+0, xf);
-        SETFLOAT(ap+1, yf);
-        SETFLOAT(ap+2, zf);
+        SETFLOAT(ap+1, -yf);
+        SETFLOAT(ap+2, -zf);
         outlet_anything(x->out, s_local, 3, ap);
     }
 }
@@ -85,7 +93,7 @@ static void gpmotion_world(t_gpmotion *x)
             xf = x->wx, yf = x->wy;
         t_atom ap[2];
         SETFLOAT(ap+0, xf);
-        SETFLOAT(ap+1, yf);
+        SETFLOAT(ap+1, -yf);
         outlet_anything(x->out, s_world, 2, ap);
     }
 }
@@ -100,7 +108,7 @@ static void gpmotion_player(t_gpmotion *x)
             xf = x->px, yf = x->py;
         t_atom ap[2];
         SETFLOAT(ap+0, xf);
-        SETFLOAT(ap+1, yf);
+        SETFLOAT(ap+1, -yf);
         outlet_anything(x->out, s_player, 2, ap);
     }
 }
