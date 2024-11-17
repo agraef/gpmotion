@@ -10,10 +10,18 @@ typedef struct _gpmotion {
     t_object  x_obj;
     GamepadMotion *gp;
     float ax, ay, az, gx, gy, gz;
+    float lx, ly, lz;
+    float wx, wy;
+    float px, py;
     double t;
-    int state;
+    int state, mode;
     t_outlet *out;
 } t_gpmotion;
+
+static void gpmotion_mode(t_gpmotion *x, t_floatarg f)
+{
+    x->mode = f != 0;
+}
 
 // bang yields the normalized gravity vector (x, y, z)
 
@@ -30,13 +38,17 @@ static void gpmotion_bang(t_gpmotion *x)
     }
 }
 
-// local yields rotation in deg/s (x, y, z)
+// retrieve current angular velocity in deg/s (mode == 1), or rotation angle
+// (mode == 0) in deg, (x, y, z) in local, or (x, y) in world/player space
 
 static void gpmotion_local(t_gpmotion *x)
 {
     if (x->state >= 0 && x->t != 0.0f) {
         float xf, yf, zf;
-        gamepad_motion_local(x->gp, &xf, &yf, &zf);
+        if (x->mode)
+            gamepad_motion_local(x->gp, &xf, &yf, &zf);
+        else
+            xf = x->lx, yf = x->ly, zf = x->lz;
         t_atom ap[3];
         SETFLOAT(ap+0, xf);
         SETFLOAT(ap+1, yf);
@@ -45,13 +57,14 @@ static void gpmotion_local(t_gpmotion *x)
     }
 }
 
-// world and player yield rotation in deg/s (x, y) in world and player space
-
 static void gpmotion_world(t_gpmotion *x)
 {
     if (x->state >= 0 && x->t != 0.0f) {
         float xf, yf;
-        gamepad_motion_world(x->gp, &xf, &yf);
+        if (x->mode)
+            gamepad_motion_world(x->gp, &xf, &yf);
+        else
+            xf = x->wx, yf = x->wy;
         t_atom ap[2];
         SETFLOAT(ap+0, xf);
         SETFLOAT(ap+1, yf);
@@ -63,12 +76,24 @@ static void gpmotion_player(t_gpmotion *x)
 {
     if (x->state >= 0 && x->t != 0.0f) {
         float xf, yf;
-        gamepad_motion_player(x->gp, &xf, &yf);
+        if (x->mode)
+            gamepad_motion_player(x->gp, &xf, &yf);
+        else
+            xf = x->px, yf = x->py;
         t_atom ap[2];
         SETFLOAT(ap+0, xf);
         SETFLOAT(ap+1, yf);
         outlet_anything(x->out, s_player, 2, ap);
     }
+}
+
+// reset current rotation to origin (0, 0, 0)
+
+static void gpmotion_reset(t_gpmotion *x)
+{
+    x->lx = 0.0f; x->ly = 0.0f; x->lz = 0.0f;
+    x->wx = 0.0f; x->wy = 0.0f;
+    x->px = 0.0f; x->py = 0.0f;
 }
 
 // calibration
@@ -83,7 +108,7 @@ static void gpmotion_stop(t_gpmotion *x)
     gamepad_motion_stop_calibration(x->gp);
 }
 
-static void gpmotion_reset(t_gpmotion *x)
+static void gpmotion_clear(t_gpmotion *x)
 {
     gamepad_motion_reset_calibration(x->gp);
 }
@@ -94,11 +119,20 @@ static void gpmotion_reset(t_gpmotion *x)
 static void gpmotion_update(t_gpmotion *x)
 {
     double t = x->t;
+    double dt = clock_gettimesince(t)/1000.0;
     x->t = clock_getlogicaltime();
     if (t != 0.0f && x->t > t) {
+        float xf, yf, zf;
         gamepad_motion_process(x->gp,
                                x->gx, x->gy, x->gz,
-                               x->ax, x->ay, x->az, clock_gettimesince(t));
+                               x->ax, x->ay, x->az, dt);
+        // accumulate
+        gamepad_motion_local(x->gp, &xf, &yf, &zf);
+        x->lx += xf*dt; x->ly += yf*dt; x->lz += zf*dt;
+        gamepad_motion_world(x->gp, &xf, &yf);
+        x->wx += xf*dt; x->wy += yf*dt;
+        gamepad_motion_player(x->gp, &xf, &yf);
+        x->px += xf*dt; x->py += yf*dt;
     }
     x->state = 0;
 }
@@ -127,8 +161,12 @@ static void *gpmotion_new(void)
     x->gp = gamepad_motion_init();
     x->ax = 0.0f; x->ay = 0.0f; x->az = 0.0f;
     x->gx = 0.0f; x->gy = 0.0f; x->gz = 0.0f;
+    x->lx = 0.0f; x->ly = 0.0f; x->lz = 0.0f;
+    x->wx = 0.0f; x->wy = 0.0f;
+    x->px = 0.0f; x->py = 0.0f;
     x->t = 0.0f;
     x->state = -1;
+    x->mode = 0;
     x->out = outlet_new(&x->x_obj, 0);
     return (void *)x;
 }
@@ -151,6 +189,8 @@ void gpmotion_setup(void)
                                sizeof(t_gpmotion),
                                CLASS_DEFAULT, 0);
 
+    class_addmethod(gpmotion_class,
+                    (t_method)gpmotion_mode, gensym("mode"), A_DEFFLOAT, 0);
     class_addbang(gpmotion_class, gpmotion_bang);
     class_addmethod(gpmotion_class,
                     (t_method)gpmotion_local, s_local, 0);
@@ -159,11 +199,13 @@ void gpmotion_setup(void)
     class_addmethod(gpmotion_class,
                     (t_method)gpmotion_player, s_player, 0);
     class_addmethod(gpmotion_class,
+                    (t_method)gpmotion_reset, gensym("reset"), 0);
+    class_addmethod(gpmotion_class,
                     (t_method)gpmotion_start, gensym("start"), 0);
     class_addmethod(gpmotion_class,
                     (t_method)gpmotion_stop, gensym("stop"), 0);
     class_addmethod(gpmotion_class,
-                    (t_method)gpmotion_reset, gensym("reset"), 0);
+                    (t_method)gpmotion_clear, gensym("clear"), 0);
     class_addmethod(gpmotion_class, (t_method)gpmotion_accel, gensym("accel"), A_FLOAT, A_FLOAT, A_FLOAT, 0);
     class_addmethod(gpmotion_class, (t_method)gpmotion_gyro, gensym("gyro"), A_FLOAT, A_FLOAT, A_FLOAT, 0);
 }
