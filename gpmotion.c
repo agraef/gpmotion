@@ -18,8 +18,8 @@ typedef struct _gpmotion {
     float slx, sly, slz, swx, swy, spx, spy; // sampled [deg/s]
     // Pd time of last sensor update
     double t;
-    // state of sensor update, gyro mode
-    int state, mode;
+    // state of sensor update, gyro mode, pause processing
+    int state, mode, pause;
     t_outlet *out;
 } t_gpmotion;
 
@@ -29,6 +29,16 @@ typedef struct _gpmotion {
 static void gpmotion_mode(t_gpmotion *x, t_floatarg f)
 {
     x->mode = f != 0;
+}
+
+// pause and resume all processing (1 = pause, 0 = resume)
+
+static void gpmotion_pause(t_gpmotion *x, t_floatarg f)
+{
+    x->pause = f != 0;
+    // reset the clock when resumed
+    if (!x->pause)
+        x->t = clock_getlogicaltime();
 }
 
 // yaw relax factor for player space (sensible range is about 1.15 .. 2 which
@@ -178,6 +188,8 @@ static void gpmotion_accel(t_gpmotion *x, t_floatarg xf, t_floatarg yf, t_floata
     x->ax = xf; x->ay = yf; x->az = zf;
     if (x->state <= 0)
         x->state++;
+    else if (x->pause)
+        x->state = 0;
     else
         gpmotion_update(x);
 }
@@ -187,6 +199,8 @@ static void gpmotion_gyro(t_gpmotion *x, t_floatarg xf, t_floatarg yf, t_floatar
     x->gx = xf; x->gy = yf; x->gz = zf;
     if (x->state <= 0)
         x->state++;
+    else if (x->pause)
+        x->state = 0;
     else
         gpmotion_update(x);
 }
@@ -207,6 +221,7 @@ static void *gpmotion_new(void)
     x->t = 0.0f;
     x->state = -1;
     x->mode = 0;
+    x->pause = 0;
     x->out = outlet_new(&x->x_obj, 0);
     return (void *)x;
 }
@@ -231,6 +246,8 @@ void gpmotion_setup(void)
 
     class_addmethod(gpmotion_class,
                     (t_method)gpmotion_mode, gensym("mode"), A_DEFFLOAT, 0);
+    class_addmethod(gpmotion_class,
+                    (t_method)gpmotion_pause, gensym("pause"), A_FLOAT, 0);
     class_addmethod(gpmotion_class,
                     (t_method)gpmotion_yawrf, gensym("yawrf"), A_DEFFLOAT, 0);
     class_addbang(gpmotion_class, gpmotion_bang);
