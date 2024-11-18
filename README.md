@@ -8,4 +8,6 @@ The included examples are controller-test.pd (a simple test patch which doesn't 
 
 The patches take OSC (not gamepad) input in the format provided by [joyosc](https://github.com/danomatika/joyosc), so you need to have that installed as well (run it as `joyosc -s` so that it reports the sensor data). Alternatively, you can also use [TouchOSC](https://hexler.net/touchosc) with the provided joyosc.tosc template.
 
+Moreover, the gpmotion-help.pd patch requires a device that generates *both* acceleration and gyroscope (angular motion) data. Most PlayStation- and Switch-compatible gamepads will provide this, but some may need to be switched into a special mode to enable this (the user guide that comes with your controller should tell you how to do this). Some mobile devices may provide acceleration but no angular motion data; these will *not* work with the patch. When in doubt, use the controller-test.pd patch to check the raw sensor data of the device. If the `accel` or `gyro` data shows nothing but zero values then that device won't be suitable to be used with the gpmotion-help.pd patch.
+
 More information can be found in the gyroscope.pdf document contained in the package.
