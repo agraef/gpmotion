@@ -33,3 +33,74 @@ The toplevel directory contains the following Pd patches for testing purposes. T
 - A much more advanced version of this patch is available in gpmotion-help.pd. This processes the gyroscope data using Jibb Smart's algorithm mentioned above which calculates gravity and accumulated or sampled rotation data from the raw sensor inputs, please see the [gyrowiki](http://gyrowiki.jibbsmart.com/) for details. Also note that this patch requires the gpmotion external which first needs to be compiled before the patch will work. Running `make` will usually do the trick; check the toplevel README file for details.
 - The TouchOSC (mk2) template joyosc.tosc can be used on Android and iOS devices to emulate a game controller including gyroscope data from the device (turn on the corresponding toggle in the template). It produces OSC data compatible with that of the joyosc program, so it can be used with the controller-test.pd and gpmotion-help.pd patches in lieu of a real gamepad. The template has been set up to work in portrait mode and remaps the axes so that it provides the same kind of sensor data as a gamepad.
 
+See below for some information on how to get started with the example patches.
+
+## Usage
+
+It's a good idea to start with the controller-test.pd patch because it's simpler and provides a quick check to see whether your device provides the required sensor data. Here is how that patch looks like:
+
+![controller-test.pd](pics/controller-test.png)
+
+With the gamepad connected to your computer and `joyosc -s` running in the background, check the `poll` toggle to start receiving data from the device. You can press the buttons and triggers, move the joysticks, and swipe across the touchpad on the device to test that the device is connected and all its parts are working as expected.
+
+Next, check the toggle above the `sensor` subpatch to enable the processing of motion (accelerometer and gyroscope) data. If all is well, you should see x y z data in both the `accel` and `gyro` listboxes, as shown in the screenshot above. This is the raw sensor data as received by joyosc through the SDL library, thus the readings will be in m/sec^2 for the acceleration and radians/sec for the gyroscope data.
+
+If you see no sensor output or just a bunch of zeros then you're out of luck; your device doesn't produce the sensor data required by the gpmotion-help.pd patch. (But check the user guide of your gamepad to see if it can be switched into a mode that will generate motion data.)
+
+The same procedure will also work with the included joyosc.tosc template running on an Android or iOS device. Just make sure that you have an OSC connection set up which connects to your computer's IP address and (send) port 8880 (which matches joyosc's default output port). The receive port can be left empty or you can set it to port 7770 (which matches joyosc's default input port).
+
+### gpmotion
+
+After having verified that your gamepad or mobile device works with the controller-test.pd patch, it's time to kick the tires and check out the gpmotion-help.pd patch:
+
+![gpmotion-help.pd](pics/gpmotion-help.png)
+
+This shares the basic elements with the controller-test.pd patch. So you first check the `poll` toggle to enable the OSC connection, then the `motion` toggle to receive motion data. But the patch also provides a bunch of new features. In particular, here the `motion` subpatch contains an instance of the `gpmotion` object which processes the raw motion data using Jibb Smart's algorithm. The patch then presents this data in different ways:
+
+- **gravity**: This shows the gravity vector pointing downwards (i.e., towards the center of the Earth) which is contained in the accelerometer data and provides a quick way to check the orientation of the device.
+- **local space**: This shows the pitch-yaw-roll data relative to the orientation of the device (as determined by the gravity vector).
+- **world** and **player space**: These each use pitch with a combination of yaw and roll relative to the gravity vector, but in different ways. These are usually preferred for gamepads, while local space usually works better with mobile devices. See the [gyrowiki](http://gyrowiki.jibbsmart.com/) for details.
+
+Please note that in the help patch, only one of the spaces can be shown at any time. You can switch between spaces with the messages `gravity`, `local`, etc. The actual data is shown in the listbox near the bottom of the patch; since these numbers will change very quickly, you can engage the `freeze` toggle to have a good look at the current sample at any time. The same data is also shown in a visual form with the sliders on the right.
+
+Also note that while the `gpmotion` object accepts motion data in m/sec^2 and radians/sec units, as provided in the OSC input, it *outputs* data in g (1 g = 9.81 m/sec^2) and degrees/sec units. This is the data shown in the listbox. In addition, the local, world, and player space values in the sliders have all been *normalized* to the -1 ... +1 range, and are *scaled* by having a sensitivity setting applied to them, which can be set in the `config` subpatch; more on that below.
+
+The listbox and the sliders each have their own *receiver symbols* which you can use in a secondary patch to post-process the data in any desired way, e.g., to synthesize sounds. These are:
+
+- `data`: The processed sensor data (gravity, local space, etc.) from the `gpmotion` object shown in the listbox. These are lists of two or three elements (x y z for gravity, x=pitch y=yaw z=roll for local, and x=pitch y=yaw+roll for world and player space).
+- `gravx`, `gravy`, `gravz`: The data from the `gravity` sliders.
+- `locx`, `locy`, `locz`: The normalized and scaled data from the `local space` sliders.
+- `wrldx`, `wrldy`: The normalized and scaled data from the `world space` sliders.
+- `plyrx`, `plyry`: The normalized and scaled data from the `player space` sliders.
+
+#### Configuration
+
+Various options can be adjusted in the `config` subpatch at the bottom of the patch:
+
+![gpmotion configuration](pics/gpmotion-config.png)
+
+**Calibration**: If needed, you can calibrate the gyroscope as follows: Make sure that the device is in neutral position (e.g., flat on a table), then check the `enable` toggle under `gyro calibration`, and after a short while uncheck the toggle again. The saved calibration data will also be printed in the Pd console so that you can check the result. You can also clear the calibration at any time with the `clear` button.
+
+**Gyro mode**: The `gyro mode` option, when checked, will show momentary angular velocity instead of accumulated rotation values.
+
+**Update rate**: The update rate for the processed sensor data can adjusted as needed, the default being an update rate of 10 Hz (a.k.a. one sample each 100 msec) which should be good enough for many purposes. If you have a reasonably fast computer then you might try to beef it up to 25 Hz, or use the 1 Hz setting for close inspection in "slow motion". In any case, the patch uses `line` to smooth the transitions between updates, so that all suggested values should work fine; it goes without saying, though, that with an update rate as low as 1 Hz the latency will be very noticeable. You can in fact set the rate to *any* positive value, but slower computers might struggle with higher update rates, so we recommend sticking to the suggested values unless you absolutely need to change the value to something completely different.
+
+**Sensitivity**: The sensitivity of the local, world, and player space sliders to rotation can be adjusted with the `sensitivity` radio button which determines the scaling factor by which the actual rotation values are multiplied. The maximum angle in the display (which corresponds to the 1 value of the sliders) is shown in the numbox below. The radio buttons provide powers-of-2 scaling factors which correspond to maximum angles ranging from 2^0 = 360° to 2^5 = 11.25°. The default is 2^3 = 45°.
+
+**Yaw relax factor**: This setting only applies to player space. The `yaw relax` factor determines how far the device may be tilted in order to still have the combined yaw and roll value work as intended. The default (and maximum) value of 2 corresponds to 60° which matches the [JoyShockMapper](https://github.com/Electronicks/JoyShockMapper) default, while the minimum of 1.15 reduces the buffer zone to some 30°.
+
+#### Shortcuts
+
+For convenience, the patch also binds various frequently used configuration options to buttons on the device. The following table lists the currently available bindings; you can also find a short description of these in the patch itself.
+
+| Button           | Function                                                     |
+| ---------------- | ------------------------------------------------------------ |
+| 🅰 or **⨯**       | Pause motion while pressed (useful to quickly realign the controller) |
+| 🆇 or 🞐           | Turn the processing of motion data on or off                 |
+| 🅱 or ⭘           | Freeze the data display (on or off)                          |
+| Left stick       | Reset rotation to the origin (useful to recenter *after* realigning the controller) |
+| Right stick      | Turn gyro mode on or off (see [Configuration](#configuration) above) |
+| Left bumper      | Turn calibration on or off (see [Configuration](#configuration) above) |
+| Right bumper     | Clear calibration (see [Configuration](#configuration) above) |
+| D-Pad up/down    | Cycle through the different spaces (gravity, local space, etc.) |
+| D-Pad left/right | Adjust sensitivity (see [Configuration](#configuration) above) |
