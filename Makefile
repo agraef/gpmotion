@@ -17,7 +17,7 @@ gpmotion_version := $(shell git describe --tags 2>/dev/null)
 
 gpmotion.class.sources := gpmotion.c motion.cpp
 
-datafiles = COPYING $(wildcard gpmotion*-help.pd)
+datafiles = COPYING README.md controller-test.pd $(wildcard gpmotion*-help.pd) joyosc.tosc doc/gyroscope.pdf
 
 PDLIBBUILDER_DIR=.
 include $(PDLIBBUILDER_DIR)/Makefile.pdlibbuilder
