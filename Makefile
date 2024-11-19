@@ -19,5 +19,11 @@ gpmotion.class.sources := gpmotion.c motion.cpp
 
 datafiles = COPYING README.md controller-test.pd $(wildcard gpmotion*-help.pd) joyosc.tosc doc/gyroscope.pdf
 
+# need this for compiling GamepadMotion.hpp with clang on macOS
+UNAME_S := $(shell uname -s)
+ifeq ($(UNAME_S),Darwin)
+CXX = c++ -std=c++17
+endif
+
 PDLIBBUILDER_DIR=.
 include $(PDLIBBUILDER_DIR)/Makefile.pdlibbuilder
