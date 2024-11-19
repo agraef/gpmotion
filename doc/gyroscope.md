@@ -1,6 +1,6 @@
 # gyroscope
 
-Albert Gräf \<<aggraef@gmail.com>\>, 2024-11-18
+Albert Gräf \<<aggraef@gmail.com>\>, 2024-11-20
 
 Some game controllers and many smartphones have sensors for detecting orientation and angular movement in 3-dimensional space, so-called inertial measurement units, better known as *gyroscopes*. joyosc (when invoked with the `-s` option) and TouchOSC (with scripting) can read the motion data of a device and convert it to OSC data. In joyosc, motion data is converted to `accel` and `gyro` data, each with 3 values (x, y, z). The accelerometer data (`accel`) measures acceleration in m/sec^2. This normally includes an acceleration counteracting gravity at 9.81 m/sec^2, so that it is possible to determine the orientation of the device relative to the ground. The angular movement data (`gyro`) measures rotation in radians/sec.
 
@@ -29,9 +29,11 @@ On modern smartphones, the principal plane of the device typically is the x-y pl
 
 The toplevel directory contains the following Pd patches for testing purposes. The patches take OSC (not gamepad) input in the format provided by [joyosc](https://github.com/danomatika/joyosc). Alternatively, you can also use [TouchOSC](https://hexler.net/touchosc) with the provided template (see below).
 
-- The controller-test.pd patch provides a simple way to show the raw gyroscope data produced by `joyosc -s`, along with button presses, joystick axes, and touchpad data (if available).
-- A much more advanced version of this patch is available in gpmotion-help.pd. This processes the gyroscope data using Jibb Smart's algorithm mentioned above which calculates gravity and accumulated or sampled rotation data from the raw sensor inputs, please see the [gyrowiki](http://gyrowiki.jibbsmart.com/) for details. Also note that this patch requires the gpmotion external which first needs to be compiled before the patch will work. Running `make` will usually do the trick; check the toplevel README file for details.
-- The TouchOSC (mk2) template joyosc.tosc can be used on Android and iOS devices to emulate a game controller including gyroscope data from the device (turn on the corresponding toggle in the template). It produces OSC data compatible with that of the joyosc program, so it can be used with the controller-test.pd and gpmotion-help.pd patches in lieu of a real gamepad. The template has been set up to work in portrait mode and remaps the axes so that it provides the same kind of sensor data as a gamepad.
+- The **controller-test.pd** patch provides a simple way to show the raw acceleration and gyroscope data produced by `joyosc -s`, along with button presses, joystick axes, and touchpad data (if available).
+- The **gpmotion** external processes the raw sensor data produced by `joyosc -s` using Jibb Smart's algorithm mentioned above, see the [gyrowiki](http://gyrowiki.jibbsmart.com/) for details. It calculates gravity and accumulated or sampled rotation data from the raw sensor inputs. This external is required by the patches below and thus needs to be compiled before using these patches. Running `make` will usually do the trick; check the toplevel README file for details.
+- The **gpmotion-help.pd** patch shows how to use the gpmotion object at a basic level and lists all available messages.
+- The **gpmotion-demo.pd** patch is a fleshed-out version of the help patch with various configuration options and button bindings.
+- The TouchOSC (mk2) template **joyosc.tosc** can be used on Android and iOS devices to emulate a gamepad with motion tracking (if available on the device). It produces OSC data compatible with the joyosc program, so it can be used in lieu of joyosc. The template has been set up to work in portrait mode and remaps the axes so that it provides the same kind of sensor data as a gamepad.
 
 See below for some information on how to get started with the example patches.
 
@@ -45,25 +47,35 @@ With the gamepad connected to your computer and `joyosc -s` running in the backg
 
 Next, check the toggle above the `sensor` subpatch to enable the processing of motion (accelerometer and gyroscope) data. If all is well, you should see x y z data in both the `accel` and `gyro` listboxes, as shown in the screenshot above. This is the raw sensor data as received by joyosc through the SDL library, thus the readings will be in m/sec^2 for the acceleration and radians/sec for the gyroscope data.
 
-If you see no sensor output or just a bunch of zeros then you're out of luck; your device doesn't produce the sensor data required by the gpmotion-help.pd patch. (But check the user guide of your gamepad to see if it can be switched into a mode that will generate motion data.)
+If you see no sensor output or just a bunch of zeros then you're out of luck; your device doesn't produce the sensor data required by the gpmotion-help.pd and gpmotion-demo.pd patches. (But check the user guide of your gamepad to see if it can be switched into a mode that will generate motion data.)
 
 The same procedure will also work with the included joyosc.tosc template running on an Android or iOS device. Just make sure that you have an OSC connection set up which connects to your computer's IP address and (send) port 8880 (which matches joyosc's default output port). The receive port can be left empty or you can set it to port 7770 (which matches joyosc's default input port).
 
-### gpmotion
+### gpmotion-help
 
 After having verified that your gamepad or mobile device works with the controller-test.pd patch, it's time to kick the tires and check out the gpmotion-help.pd patch:
 
 ![gpmotion-help.pd](pics/gpmotion-help.png)
 
-This shares the basic elements with the controller-test.pd patch. So you first check the `poll` toggle to enable the OSC connection, then the `motion` toggle to receive motion data. But the patch also provides a bunch of new features. In particular, here the `motion` subpatch contains an instance of the `gpmotion` object which processes the raw motion data using Jibb Smart's algorithm. The patch then presents this data in different ways:
+This shares the basic elements with the controller-test.pd patch. First check the red `poll` toggle to enable the OSC connection, then the yellow `process` toggle to feed motion data to the `gpmotion` object, and finally the green `retrieve` toggle to start showing the processed data in the sliders at the bottom of the patch. The patch presents this data in different ways:
 
 - **gravity**: This shows the gravity vector pointing downwards (i.e., towards the center of the Earth) which is contained in the accelerometer data and provides a quick way to check the orientation of the device.
 - **local space**: This shows the pitch-yaw-roll data relative to the orientation of the device (as determined by the gravity vector).
 - **world** and **player space**: These each use pitch with a combination of yaw and roll relative to the gravity vector, but in different ways. These are usually preferred for gamepads, while local space usually works better with mobile devices. See the [gyrowiki](http://gyrowiki.jibbsmart.com/) for details.
 
-Please note that in the help patch, only one of the spaces can be shown at any time. You can switch between spaces with the messages `gravity`, `local`, etc. The actual data is shown in the listbox near the bottom of the patch; since these numbers will change very quickly, you can engage the `freeze` toggle to have a good look at the current sample at any time. The same data is also shown in a visual form with the sliders on the right.
+By default, the patch displays `gravity`. You can switch between different kinds of data to be shown with the vertical strip of messages on the right; `local`, `world` and `player` show rotation data in the available spaces.
 
-Also note that while the `gpmotion` object accepts motion data in m/sec^2 and radians/sec units, as provided in the OSC input, it *outputs* data in g (1 g = 9.81 m/sec^2) and degrees/sec units. This is the data shown in the listbox. In addition, the local, world, and player space values in the sliders have all been *normalized* to the -1 ... +1 range, and are *scaled* by having a sensitivity setting applied to them, which can be set in the `config` subpatch; more on that below.
+Open the `messages` subpatch to see an overview of the messages that can be passed to gpmotion's inlet. Also, the `buttons` subpatch illustrates how to set up button bindings for these messages.
+
+### gpmotion-demo
+
+This is a more elaborate version of the gpmotion help patch which provides a bunch of new features:
+
+![gpmotion-demo.pd](pics/gpmotion-demo.png)
+
+The actual data is shown in the listbox near the bottom of the patch; since these numbers will change very quickly, you can engage the `freeze` toggle to have a good look at the current sample at any time. The same data is shown in a visual form with the sliders on the right. Similar to the help patch, you can switch between the different kinds of data with the vertical strip of messages.
+
+Note that while the `gpmotion` object accepts motion data in m/sec^2 and radians/sec units, as provided in the OSC input, it *outputs* data in g (1 g = 9.81 m/sec^2) and degrees/sec units. This is the data shown in the listbox. The local, world, and player space values in the sliders on the right have all been *normalized* to the -1 ... +1 range, and are *scaled* by having a sensitivity setting applied to them, which can be set in the `config` subpatch; more on that below.
 
 The listbox and the sliders each have their own *receiver symbols* which you can use in a secondary patch to post-process the data in any desired way, e.g., to synthesize sounds. These are:
 
