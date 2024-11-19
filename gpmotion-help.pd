@@ -81,7 +81,7 @@
 #X restore 220 140 pd touchpad;
 #X obj 294 110 tgl 15 0 empty empty empty 17 7 0 10 #fcfcfc #000000
 #000000 0 1;
-#N canvas 481 255 450 417 motion 0;
+#N canvas 385 343 450 417 motion 0;
 #X obj 20 70 spigot;
 #X obj 20 20 inlet;
 #X obj 80 20 inlet;
@@ -354,24 +354,147 @@
 #X msg 310 190 yawrf \$1;
 #X obj 130 130 == 0;
 #X msg 130 159 pause \$1;
-#N canvas 737 383 450 300 reset 0;
+#N canvas 743 383 380 300 reset 0;
 #X obj 20 21 r reset;
 #X obj 20 100 symbol gravity;
 #X obj 20 159 route gravity;
 #X msg 20 129 \$1;
 #X obj 115 49 symbol;
-#X obj 115 20 r space;
-#X msg 108 219 set \$1 0 0 0;
-#X obj 108 248 outlet;
-#X obj 108 190 symbol;
+#X obj 115 21 r space;
+#X obj 108 250 outlet;
+#X obj 220 21 r rtime;
+#X floatatom 220 80 5 0 0 0 - - -, f 5;
+#X obj 220 50 expr int($f1*1000);
+#X obj 189 160 tgl 15 0 empty empty empty 17 7 0 10 #fcfcfc #000000
+#000000 1 1;
+#X obj 273 160 tgl 15 0 empty empty empty 17 7 0 10 #fcfcfc #000000
+#000000 0 1;
+#N canvas 1024 168 450 300 rtime 0;
+#X obj 20 70 t f f;
+#X obj 110 100 > 0;
+#X obj 110 130 t f f;
+#X obj 110 159 == 0;
+#X obj 20 20 inlet;
+#X obj 110 220 outlet;
+#X obj 164 220 outlet;
+#X obj 20 220 s rtime-ms;
+#X connect 0 0 7 0;
+#X connect 0 1 1 0;
+#X connect 1 0 2 0;
+#X connect 2 0 3 0;
+#X connect 2 1 6 0;
+#X connect 3 0 5 0;
+#X connect 4 0 0 0;
+#X restore 220 110 pd rtime;
+#N canvas 736 383 450 300 immediate 0;
+#X msg 20 138 set \$1 0 0 0;
+#X obj 20 109 symbol;
+#X obj 20 80 spigot 1;
+#X obj 20 20 inlet;
+#X obj 73 20 inlet;
+#X obj 20 200 outlet;
+#X connect 0 0 5 0;
+#X connect 1 0 0 0;
+#X connect 2 0 1 0;
+#X connect 3 0 2 0;
+#X connect 4 0 2 1;
+#X restore 108 200 pd immediate;
+#N canvas 883 317 523 376 fade 0;
+#X obj 20 100 spigot;
+#X obj 20 158 symbol;
+#X obj 270 130 t b b b;
+#X obj 270 159 f;
+#X obj 270 277 line;
+#X obj 340 159 f;
+#X obj 340 277 line;
+#X obj 410 159 f;
+#X obj 410 277 line;
+#X obj 320 71 r data;
+#X obj 320 100 unpack 0 0 0;
+#X obj 150 130 t b b b;
+#X msg 196 160 pause 1;
+#X obj 150 159 del;
+#X msg 150 188 pause 0;
+#X obj 200 100 t f f f f;
+#X obj 20 20 inlet;
+#X obj 70 20 inlet;
+#X obj 20 310 outlet;
+#X text 210 20 pause sensor input \, fade to 0 \, 0 \, 0 \, resume
+;
+#X obj 270 188 t b f;
+#X msg 270 217 0;
+#X obj 270 248 pack 0 0;
+#X obj 340 248 pack 0 0;
+#X obj 410 248 pack 0 0;
+#X obj 340 188 t b f;
+#X msg 340 217 0;
+#X obj 410 188 t b f;
+#X msg 410 217 0;
+#X obj 200 70 r rtime-ms;
+#X obj 20 129 t b a;
+#X obj 20 197 pack f f f s;
+#X msg 20 226 set \$4 \$1 \$2 \$3;
+#X connect 0 0 30 0;
+#X connect 1 0 31 3;
+#X connect 2 0 3 0;
+#X connect 2 1 5 0;
+#X connect 2 2 7 0;
+#X connect 3 0 20 0;
+#X connect 4 0 31 0;
+#X connect 5 0 25 0;
+#X connect 6 0 31 1;
+#X connect 7 0 27 0;
+#X connect 8 0 31 2;
+#X connect 9 0 10 0;
+#X connect 10 0 3 1;
+#X connect 10 1 5 1;
+#X connect 10 2 7 1;
+#X connect 11 0 13 0;
+#X connect 11 1 2 0;
+#X connect 11 2 12 0;
+#X connect 12 0 18 0;
+#X connect 13 0 14 0;
+#X connect 14 0 18 0;
+#X connect 15 0 22 1;
+#X connect 15 1 23 1;
+#X connect 15 2 24 1;
+#X connect 15 3 13 1;
+#X connect 16 0 0 0;
+#X connect 17 0 0 1;
+#X connect 20 0 21 0;
+#X connect 20 1 4 0;
+#X connect 21 0 22 0;
+#X connect 22 0 4 0;
+#X connect 23 0 6 0;
+#X connect 24 0 8 0;
+#X connect 25 0 26 0;
+#X connect 25 1 6 0;
+#X connect 26 0 23 0;
+#X connect 27 0 28 0;
+#X connect 27 1 8 0;
+#X connect 28 0 24 0;
+#X connect 29 0 15 0;
+#X connect 30 0 11 0;
+#X connect 30 1 1 0;
+#X connect 31 0 32 0;
+#X connect 32 0 18 0;
+#X restore 227 200 pd fade;
 #X connect 0 0 1 0;
 #X connect 1 0 3 0;
-#X connect 2 1 8 0;
+#X connect 2 1 13 0;
+#X connect 2 1 14 0;
 #X connect 3 0 2 0;
 #X connect 4 0 1 1;
 #X connect 5 0 4 0;
-#X connect 6 0 7 0;
-#X connect 8 0 6 0;
+#X connect 7 0 9 0;
+#X connect 8 0 12 0;
+#X connect 9 0 8 0;
+#X connect 10 0 13 1;
+#X connect 11 0 14 1;
+#X connect 12 0 10 0;
+#X connect 12 1 11 0;
+#X connect 13 0 6 0;
+#X connect 14 0 6 0;
 #X restore 130 220 pd reset;
 #X connect 0 0 4 0;
 #X connect 1 0 0 0;
@@ -525,21 +648,21 @@
 #000000 #000000 4337 1;
 #X text 500 25 gravity;
 #X obj 500 150 hsl 64 15 -1 1 0 0 empty locx empty -2 -8 0 10 #fcfcfc
-#000000 #000000 3150 1;
+#000000 #000000 3882 1;
 #X obj 500 170 hsl 64 15 -1 1 0 0 empty locy empty -2 -8 0 10 #fcfcfc
-#000000 #000000 3152 1;
+#000000 #000000 2736 1;
 #X obj 500 190 hsl 64 15 -1 1 0 0 empty locz empty -2 -8 0 10 #fcfcfc
-#000000 #000000 3139 1;
+#000000 #000000 895 1;
 #X text 500 125 local space;
 #X obj 500 250 hsl 64 15 -1 1 0 0 empty wrldx empty -2 -8 0 10 #fcfcfc
-#000000 #000000 2960 1;
+#000000 #000000 3259 1;
 #X obj 500 270 hsl 64 15 -1 1 0 0 empty wrldy empty -2 -8 0 10 #fcfcfc
-#000000 #000000 1448 1;
+#000000 #000000 3189 1;
 #X text 500 225 world space;
 #X obj 500 330 hsl 64 15 -1 1 0 0 empty plyrx empty -2 -8 0 10 #fcfcfc
-#000000 #000000 3011 1;
+#000000 #000000 3250 1;
 #X obj 500 350 hsl 64 15 -1 1 0 0 empty plyry empty -2 -8 0 10 #fcfcfc
-#000000 #000000 1113 1;
+#000000 #000000 3208 1;
 #X text 500 305 player space;
 #X text 20 320 gravity: x \, y \, z in g [9.81 m/s^2];
 #X text 20 340 local: pitch \, yaw \, roll in deg or deg/s;
@@ -547,7 +670,7 @@
 #X obj 410 300 bng 15 250 50 0 reset reset-s reset 17 7 0 10 #fcfcfc
 #000000 #000000;
 #X text 380 320 reset rotation;
-#N canvas 1180 304 538 379 config 0;
+#N canvas 1182 304 538 407 config 0;
 #X text 20 20 gyro calibration;
 #X obj 31 43 tgl 15 0 calibrate calibrate-s enable 17 7 0 10 #fcfcfc
 #000000 #000000 0 1;
@@ -571,16 +694,20 @@ of rotation angle [deg], f 39;
 #X msg 140 130 1;
 #X msg 100 130 5;
 #X text 230 20 gyro mode;
-#X text 230 280 yaw relax factor;
-#X obj 230 305 hsl 128 15 1.15 2 0 1 yawrf empty empty -2 -8 0 10 #fcfcfc
+#X text 230 300 yaw relax factor;
+#X obj 230 325 hsl 128 15 1.15 2 0 1 yawrf empty empty -2 -8 0 10 #fcfcfc
 #000000 #000000 12700 1;
-#X text 230 330 buffer zone for combined yaw + roll (player space)
+#X text 230 350 buffer zone for combined yaw + roll (player space)
 , f 37;
 #X text 230 214 scale the actual rotation by a sensitivity factor \,
 the calculated value is the max angle that will be shown in the display
 , f 42;
 #X text 20 214 update rate for gravity and gyro data \, default is
 10 Hz \, the calculated value is the metro time in msec, f 27;
+#X obj 20 325 hsl 128 15 0 1 0 1 rtime empty empty -2 -8 0 10 #fcfcfc
+#000000 #000000 0 1;
+#X text 20 300 reset time;
+#X text 20 350 time to move back to the origin (0-1 sec), f 27;
 #X connect 3 0 14 0;
 #X connect 4 0 14 0;
 #X connect 6 0 9 0;
