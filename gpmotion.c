@@ -125,12 +125,26 @@ static void gpmotion_player(t_gpmotion *x)
     }
 }
 
-// reset current rotation to origin (0, 0, 0)
+// reset current rotation (all spaces) to origin (0, 0, 0)
 
 static void gpmotion_reset(t_gpmotion *x)
 {
     x->lx = 0.0f; x->ly = 0.0f; x->lz = 0.0f;
     x->wx = 0.0f; x->wy = 0.0f; x->px = 0.0f; x->py = 0.0f;
+}
+
+// set current rotation for the given space (local, world, player) to the
+// given values (x, y, z)
+
+static void gpmotion_set(t_gpmotion *x, t_symbol *s_space, t_floatarg xf, t_floatarg yf, t_floatarg zf)
+{
+    if (s_space == s_local) {
+        x->lx = xf; x->ly = yf; x->lz = zf;
+    } else if (s_space == s_world) {
+        x->wx = xf; x->wy = yf;
+    } else if (s_space == s_player) {
+        x->px = xf; x->py = yf;
+    }
 }
 
 // calibration
@@ -259,6 +273,8 @@ void gpmotion_setup(void)
                     (t_method)gpmotion_player, s_player, 0);
     class_addmethod(gpmotion_class,
                     (t_method)gpmotion_reset, gensym("reset"), 0);
+    class_addmethod(gpmotion_class,
+                    (t_method)gpmotion_set, gensym("set"), A_SYMBOL, A_DEFFLOAT, A_DEFFLOAT, A_DEFFLOAT, 0);
     class_addmethod(gpmotion_class,
                     (t_method)gpmotion_start, gensym("start"), 0);
     class_addmethod(gpmotion_class,
