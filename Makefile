@@ -17,7 +17,7 @@ gpmotion_version := $(shell git describe --tags 2>/dev/null)
 
 gpmotion.class.sources := gpmotion.c motion.cpp
 
-datafiles = COPYING README.md controller-test.pd $(wildcard gpmotion*-help.pd) joyosc.tosc doc/gyroscope.pdf
+datafiles = COPYING README.md $(wildcard *.pd) joyosc.tosc doc/gyroscope.pdf
 
 # need this for compiling GamepadMotion.hpp with clang on macOS
 UNAME_S := $(shell uname -s)
