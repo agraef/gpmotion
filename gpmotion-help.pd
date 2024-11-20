@@ -1,4 +1,4 @@
-#N canvas 739 255 682 466 12;
+#N canvas 740 255 682 466 12;
 #X obj 143 70 tgl 15 0 empty empty print 17 7 0 10 #fcfcfc #000000
 #000000 0 1;
 #N canvas 757 376 418 358 oscreceive 0;
@@ -291,6 +291,17 @@ combined yaw + roll, f 46;
 #X restore 420 180 pd messages;
 #X text 420 200 ↳ click to open;
 #X text 20 280 ↳ click to open;
+#N canvas 1061 390 494 344 META 0;
+#X text 12 5 NAME gpmotion;
+#X text 12 30 KEYWORDS control joyosc gamepad motion;
+#X text 12 50 LICENSE GPL-3+;
+#X text 12 70 DESCRIPTION process motion data \, retrieve gravity and
+rotation (local/world/player space) data;
+#X text 12 106 LIBRARY gpmotion;
+#X text 12 126 AUTHOR Albert Gräf;
+#X text 12 146 WEBSITE https://github.com/agraef/gpmotion;
+#X text 12 166 RELEASE_DATE 2024;
+#X restore 600 20 pd META;
 #X connect 0 0 1 1;
 #X connect 1 0 4 0;
 #X connect 2 0 1 0;
