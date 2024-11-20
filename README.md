@@ -8,7 +8,7 @@ The package uses pdlibbuilder, so building the gpmotion external from source sho
 
 Binary packages are available from [GitHub](https://github.com/agraef/gpmotion/releases) (as usual, the latest builds can be found on the [Actions](https://github.com/agraef/gpmotion/actions) tab) and from [Deken](http://deken.puredata.info/library/gpmotion). These can be used with both vanilla [Pd](http://msp.ucsd.edu/software.html) and [Purr Data](https://agraef.github.io/purr-data/), but the latter requires that you rename the included `.so` or `.dll` file to  `gpmotion.pd_linux` (Linux/Ubuntu), `gpmotion.pd_darwin` (macOS) or `gpmotion.dll` (Windows), respectively.
 
-**NOTE:** The gpmotion-macos|windows-pd32 packages are for single precision builds of Pd, which is the version that you should get (unless you built Pd yourself with double precision support). All builds are for 64 bit systems, the macos packages will work on both Intel and Apple Silicon Macintosh computers. Also, these are unsigned packages, so on macOS you'll have to run through the usual incantations to refute Gatekeeper. Run this in the terminal, in the directory containing the `gpmotion.pd_darwin` file:
+**NOTE:** The `gpmotion-*-pd32` packages are for single precision builds of Pd, which is the version that you should get (unless you built Pd yourself with double precision support). All builds are for 64 bit systems, the macos packages will work on both Intel and Apple Silicon Macintosh computers. Also, these are unsigned packages, so on macOS you'll have to run through the usual incantations to refute Gatekeeper. Run this in the terminal, in the directory containing the `gpmotion.pd_darwin` file:
 
 ~~~shell
 sudo xattr -d com.apple.quarantine gpmotion.pd_darwin
