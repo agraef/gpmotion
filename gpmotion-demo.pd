@@ -1,4 +1,4 @@
-#N canvas 521 263 713 401 12;
+#N canvas 522 263 713 401 12;
 #X obj 390 350 cnv 15 90 40 empty empty empty 20 12 0 14 #e0e0e0 #404040
 0;
 #X obj 143 20 tgl 15 0 empty empty print 17 7 0 10 #fcfcfc #000000
@@ -532,7 +532,7 @@
 #X msg 410 60 world;
 #X msg 410 80 player;
 #X symbolatom 20 260 10 0 0 0 - space-s -, f 10;
-#N canvas 741 383 472 300 controller 0;
+#N canvas 742 383 472 300 controller 0;
 #X obj 20 70 route gc0;
 #X msg 110 70 symbol gc\$1;
 #X obj 20 128 list;
@@ -544,7 +544,7 @@
 #X obj 77 220 outlet;
 #X obj 134 220 outlet;
 #X obj 191 220 outlet;
-#N canvas 611 283 718 480 buttons 0;
+#N canvas 612 283 718 480 buttons 0;
 #X obj 20 70 route leftstick rightstick leftshoulder rightshoulder
 ;
 #X obj 20 99 sel 1;
@@ -583,14 +583,14 @@
 #X obj 330 229 s motion-s;
 #X obj 420 200 sel 1;
 #X obj 420 229 s freeze-s;
-#X obj 20 160 route dpdown dpup dpright dpleft a x b;
 #X obj 250 229 s motion-s;
 #X obj 250 200 t b;
+#X obj 20 160 route dpdown dpup dpright dpleft a b x;
 #X connect 0 0 1 0;
 #X connect 0 1 3 0;
 #X connect 0 2 5 0;
 #X connect 0 3 7 0;
-#X connect 0 4 35 0;
+#X connect 0 4 37 0;
 #X connect 1 0 2 0;
 #X connect 3 0 4 0;
 #X connect 5 0 6 0;
@@ -618,14 +618,14 @@
 #X connect 30 0 27 0;
 #X connect 31 0 32 0;
 #X connect 33 0 34 0;
-#X connect 35 0 13 0;
-#X connect 35 1 14 0;
-#X connect 35 2 23 0;
-#X connect 35 3 24 0;
-#X connect 35 4 37 0;
-#X connect 35 5 31 0;
-#X connect 35 6 33 0;
-#X connect 37 0 36 0;
+#X connect 36 0 35 0;
+#X connect 37 0 13 0;
+#X connect 37 1 14 0;
+#X connect 37 2 23 0;
+#X connect 37 3 24 0;
+#X connect 37 4 36 0;
+#X connect 37 5 31 0;
+#X connect 37 6 33 0;
 #X restore 20 170 pd buttons;
 #X connect 0 0 4 0;
 #X connect 1 0 0 1;
@@ -641,28 +641,28 @@
 #X restore 20 90 pd controller;
 #X text 20 300 processed data calculated by the gpmotion object:;
 #X obj 500 50 hsl 64 15 -1 1 0 0 empty gravx empty -2 -8 0 10 #fcfcfc
-#000000 #000000 3408 1;
+#000000 #000000 3216 1;
 #X obj 500 70 hsl 64 15 -1 1 0 0 empty gravy empty -2 -8 0 10 #fcfcfc
-#000000 #000000 253 1;
+#000000 #000000 1300 1;
 #X obj 500 90 hsl 64 15 -1 1 0 0 empty gravz empty -2 -8 0 10 #fcfcfc
-#000000 #000000 4337 1;
+#000000 #000000 5699 1;
 #X text 500 25 gravity;
 #X obj 500 150 hsl 64 15 -1 1 0 0 empty locx empty -2 -8 0 10 #fcfcfc
-#000000 #000000 3882 1;
+#000000 #000000 2908 1;
 #X obj 500 170 hsl 64 15 -1 1 0 0 empty locy empty -2 -8 0 10 #fcfcfc
-#000000 #000000 2736 1;
+#000000 #000000 3256 1;
 #X obj 500 190 hsl 64 15 -1 1 0 0 empty locz empty -2 -8 0 10 #fcfcfc
-#000000 #000000 895 1;
+#000000 #000000 3124 1;
 #X text 500 125 local space;
 #X obj 500 250 hsl 64 15 -1 1 0 0 empty wrldx empty -2 -8 0 10 #fcfcfc
-#000000 #000000 3259 1;
+#000000 #000000 1936 1;
 #X obj 500 270 hsl 64 15 -1 1 0 0 empty wrldy empty -2 -8 0 10 #fcfcfc
-#000000 #000000 3189 1;
+#000000 #000000 3952 1;
 #X text 500 225 world space;
 #X obj 500 330 hsl 64 15 -1 1 0 0 empty plyrx empty -2 -8 0 10 #fcfcfc
-#000000 #000000 3250 1;
+#000000 #000000 5209 1;
 #X obj 500 350 hsl 64 15 -1 1 0 0 empty plyry empty -2 -8 0 10 #fcfcfc
-#000000 #000000 3208 1;
+#000000 #000000 2293 1;
 #X text 500 305 player space;
 #X text 20 320 gravity: x \, y \, z in g [9.81 m/s^2];
 #X text 20 340 local: pitch \, yaw \, roll in deg or deg/s;
@@ -718,7 +718,7 @@ the calculated value is the max angle that will be shown in the display
 #X restore 400 360 pd config;
 #X obj 410 109 s space;
 #X obj 410 260 tgl 15 0 freeze freeze-s freeze 17 7 0 10 #fcfcfc #000000
-#000000 0 1;
+#000000 1 1;
 #X text 590 67 y - down-up;
 #X text 590 47 x - left-right;
 #X text 590 87 z - front-back;
@@ -731,7 +731,7 @@ the calculated value is the max angle that will be shown in the display
 #X text 590 267 yaw/roll - l/r;
 #X text 20 230 motion data: gravity [g=9.81 m/s^2] \, rotation [deg
 or deg/s];
-#X text 200 0 Button assignments:A/X: pause/motion \, B: freezeLS:
+#X text 200 0 Button assignments:A/B: pause/motion \, X: freezeLS:
 reset \, RS: gyro modeLB: calibrate \, RB: clearDP up/down: spacesDP
 left/right: sensitivity;
 #X connect 1 0 2 1;
