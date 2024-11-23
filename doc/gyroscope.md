@@ -33,6 +33,7 @@ The toplevel directory contains the following Pd patches for testing purposes. T
 - The **gpmotion** external processes the raw sensor data produced by `joyosc -s` using Jibb Smart's algorithm mentioned above, see the [gyrowiki](http://gyrowiki.jibbsmart.com/) for details. It calculates gravity and accumulated or sampled rotation data from the raw sensor inputs. This external is required by the patches below and thus needs to be compiled before using these patches. Running `make` will usually do the trick; check the toplevel README file for details.
 - The **gpmotion-help.pd** patch shows how to use the gpmotion object at a basic level and lists all available messages.
 - The **gpmotion-demo.pd** patch is a fleshed-out version of the help patch with various configuration options and button bindings.
+- The **gpmotion-test.pd** patch is another variation of the help patch with some fancy radar gui elements for visualization purposes and the same button bindings as the gpmotion-demo.pd patch.
 - The TouchOSC (mk2) template **joyosc.tosc** can be used on Android and iOS devices to emulate a gamepad with motion tracking (if available on the device). It produces OSC data compatible with the joyosc program, so it can be used in lieu of joyosc. The template has been set up to work in portrait mode and remaps the axes so that it provides the same kind of sensor data as a gamepad.
 
 See below for some information on how to get started with the example patches.
@@ -67,15 +68,19 @@ By default, the patch displays `gravity`. You can switch between different kinds
 
 Open the `messages` subpatch to see an overview of the messages that can be passed to gpmotion's inlet. Also, the `buttons` subpatch illustrates how to set up button bindings for these messages.
 
+### gpmotion-test
+
+This is a more advanced variation of the gpmotion-help.pd patch featuring some fancy radar gui objects for visualizing joysticks, touchpad, and world/player space motion. (The radar guis are programmed in Lua and thus require [pd-lua](https://agraef.github.io/pd-lua/) to work.) It also provides the same button bindings as gpmotion-demo.pd (see below) as shortcuts for the most important functions of the patch.
+
+![gpmotion-test.pd](pics/gpmotion-test.png)
+
 ### gpmotion-demo
 
-This is a more elaborate version of the gpmotion help patch which provides a bunch of new features:
+This is another version of the gpmotion help patch which provides a bunch of new features. The actual data is shown in the listbox near the bottom of the patch; since these numbers will change very quickly, you can engage the `freeze` toggle to have a good look at the current sample at any time. The same data is shown in a visual form with the sliders on the right. Similar to the help patch, you can switch between the different kinds of data with the vertical strip of messages.
 
 ![gpmotion-demo.pd](pics/gpmotion-demo.png)
 
-The actual data is shown in the listbox near the bottom of the patch; since these numbers will change very quickly, you can engage the `freeze` toggle to have a good look at the current sample at any time. The same data is shown in a visual form with the sliders on the right. Similar to the help patch, you can switch between the different kinds of data with the vertical strip of messages.
-
-Note that while the `gpmotion` object accepts motion data in m/sec^2 and radians/sec units, as provided in the OSC input, it *outputs* data in g (1 g = 9.81 m/sec^2) and degrees/sec units. This is the data shown in the listbox. The local, world, and player space values in the sliders on the right have all been *normalized* to the -1 ... +1 range, and are *scaled* by having a sensitivity setting applied to them, which can be set in the `config` subpatch; more on that below.
+Note that while the `gpmotion` object accepts motion data in m/sec^2 and radians/sec units, as provided in the OSC input, it *outputs* data in g (1 g = 9.81 m/sec^2) and degrees (or degrees/sec) units. This is the data shown in the listbox. The local, world, and player space values in the sliders on the right have all been *normalized* to the -1 ... +1 range, and are *scaled* by having a sensitivity setting applied to them, which can be set in the `config` subpatch; more on that below.
 
 The listbox and the sliders each have their own *receiver symbols* which you can use in a secondary patch to post-process the data in any desired way, e.g., to synthesize sounds. These are:
 
@@ -110,8 +115,8 @@ For convenience, the patch also binds various frequently used configuration opti
 | Button           | Function                                                     |
 | ---------------- | ------------------------------------------------------------ |
 | 🅰 or **⨯**       | Pause motion while pressed (useful to quickly realign the controller) |
-| 🆇 or 🞐           | Turn the processing of motion data on or off                 |
-| 🅱 or ⭘           | Freeze the data display (on or off)                          |
+| 🅱 or ⭘           | Turn the processing of motion data on or off                 |
+| 🆇 or 🞐           | Freeze the data display (on or off)                          |
 | Left stick       | Reset rotation to the origin (useful to recenter *after* realigning the controller) |
 | Right stick      | Turn gyro mode on or off (see [Configuration](#configuration) above) |
 | Left bumper      | Turn calibration on or off (see [Configuration](#configuration) above) |

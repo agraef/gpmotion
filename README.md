@@ -14,9 +14,11 @@ Binary packages are available from [GitHub](https://github.com/agraef/gpmotion/r
 sudo xattr -d com.apple.quarantine gpmotion.pd_darwin
 ~~~
 
+**NOTE:** On Linux, there's built-in functionality to have the touchpad of a PS4(-compatible) controller like the DualShock 4 function as a mouse. This gets in the way if you'd like to use the touchpad (in addition to the motion sensors) in a Pd patch. Therefore we have included a 72-ds4tm.rules file in the etc subdirectory which disables the unwanted mouse functionality, see this [reddit comment](https://www.reddit.com/r/Fedora/comments/15sri25/comment/jwz9rgi/) for details. This is a udev rules files to be copied to the /etc/udev/rules.d directory on your Linux system.
+
 ## Usage
 
-The included examples are controller-test.pd (a simple test patch which doesn't require the gpmotion external and thus can be used without running `make`), gpmotion-help.pd (the help patch for the gpmotion external), and gpmotion-help.pd (a more elaborate version of the help patch).
+The included examples are controller-test.pd (a simple test patch which doesn't require the gpmotion external and thus can be used without running `make`), gpmotion-help.pd (the help patch for the gpmotion external), as well as gpmotion-demo.pd and gpmotion-test.pd, two more advanced versions of the help patch. The latter also features fancy radar gui objects for visualizing joysticks, touchpad, and world/player space motion; these are programmed in Lua and thus require [pd-lua](https://agraef.github.io/pd-lua/) to work.
 
 The patches take [OSC](https://opensoundcontrol.stanford.edu/) (not gamepad) input in the format provided by [joyosc](https://github.com/danomatika/joyosc), so you need to have that installed as well (run it as `joyosc -s` so that it reports the sensor data; at the time of this writing, you need the very latest git version from joyosc's [develop](https://github.com/danomatika/joyosc/tree/develop) branch to make that work). Alternatively, you can also use [TouchOSC](https://hexler.net/touchosc) with the provided joyosc.tosc template.
 
