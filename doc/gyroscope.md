@@ -34,7 +34,7 @@ The toplevel directory contains the following Pd patches for testing purposes. T
 - The **gpmotion-help.pd** patch shows how to use the gpmotion object at a basic level and lists all available messages.
 - The **gpmotion-demo.pd** patch is a fleshed-out version of the help patch with various configuration options and button bindings.
 - The **gpmotion-test.pd** patch is another variation of the help patch with some fancy radar gui elements for visualization purposes and the same button bindings as the gpmotion-demo.pd patch.
-- The TouchOSC (mk2) template **joyosc.tosc** can be used on Android and iOS devices to emulate a gamepad with motion tracking (if available on the device). It produces OSC data compatible with the joyosc program, so it can be used in lieu of joyosc. The template has been set up to work in portrait mode and remaps the axes so that it provides the same kind of sensor data as a gamepad.
+- The TouchOSC (mk2) template **joyosc.tosc** can be used on Android and iOS devices to emulate a gamepad with motion tracking (if available on the device). It produces OSC data compatible with the joyosc program, so it can be used in lieu of joyosc. The template has been set up to work in horizontal a.k.a. landscape mode and remaps the axes so that it provides the same kind of sensor data as a gamepad. (There's also a vertical/portrait mode variation in joyosc2.tosc which displays the control data for debugging purposes. However, the landscape version will work better on devices with relatively small screens such as smartphones.)
 
 See below for some information on how to get started with the example patches.
 
